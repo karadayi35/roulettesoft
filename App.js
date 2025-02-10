@@ -158,45 +158,45 @@ const getPredictionPosition = (number) => {
 };
 
 const App = () => {
-    const [isSubscribed, setIsSubscribed] = useState(null);
+  const [isSubscribed, setIsSubscribed] = useState(null);
 
-    useEffect(() => {
-        const checkSubscription = async () => {
-            try {
-                await Purchases.configure({ apiKey: goog_owTvFdIGeXmmkXEXUTGkGnPWtWc });
-                const customerInfo = await Purchases.getCustomerInfo();
-                if (customerInfo.entitlements.active["premium"]) {
-                    setIsSubscribed(true);
-                } else {
-                    setIsSubscribed(false);
-                }
-            } catch (error) {
-                console.error("Unable to check subscription status:", error);
-                setIsSubscribed(false);
-            }
-        };
-        checkSubscription();
-    }, []);
+  useEffect(() => {
+      const checkSubscription = async () => {
+          try {
+              await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
+              const customerInfo = await Purchases.getCustomerInfo();
+              if (customerInfo.entitlements.active[REVENUECAT_ENTITLEMENT_ID]) {
+                  setIsSubscribed(true);
+              } else {
+                  setIsSubscribed(false);
+              }
+          } catch (error) {
+              console.error("Unable to check subscription status:", error);
+              setIsSubscribed(false);
+          }
+      };
+      checkSubscription();
+  }, []);
 
-    if (isSubscribed === null) {
-        return (
-            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                <ActivityIndicator size="large" color="yellow" />
-            </View>
-        );
-    }
+  if (isSubscribed === null) {
+      return (
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+              <ActivityIndicator size="large" color="yellow" />
+          </View>
+      );
+  }
 
-    return (
-        <NavigationContainer>
-            <Stack.Navigator screenOptions={{ headerShown: false }}>
-                {isSubscribed ? (
-                    <Stack.Screen name="Roulette" component={RoulettePredictor} />
-                ) : (
-                    <Stack.Screen name="Paywall" component={PaywallScreen} />
-                )}
-            </Stack.Navigator>
-        </NavigationContainer>
-    );
+  return (
+      <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+              {isSubscribed ? (
+                  <Stack.Screen name="Roulette" component={RoulettePredictor} />
+              ) : (
+                  <Stack.Screen name="Paywall" component={PaywallScreen} />
+              )}
+          </Stack.Navigator>
+      </NavigationContainer>
+  );
 };
 
 const styles = StyleSheet.create({
