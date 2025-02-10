@@ -159,23 +159,29 @@ const getPredictionPosition = (number) => {
 
 const App = () => {
   const [isSubscribed, setIsSubscribed] = useState(null);
+  const navigation = useNavigation();  // Navigation ekledik
 
   useEffect(() => {
-      const checkSubscription = async () => {
+      Purchases.configure({ apiKey: REVENUECAT_API_KEY });  // Sadece 1 kere çağrılacak
+  }, []);
+
+  useEffect(() => {
+      const updateSubscriptionStatus = async () => {
           try {
-              await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
               const customerInfo = await Purchases.getCustomerInfo();
-              if (customerInfo.entitlements.active[REVENUECAT_ENTITLEMENT_ID]) {
+              if (customerInfo.entitlements?.active?.["premium"]) {
+                  console.log("✅ Subscription successful!");
                   setIsSubscribed(true);
+                  navigation.replace("Roulette");  // Satın aldıysa yönlendir
               } else {
                   setIsSubscribed(false);
               }
           } catch (error) {
-              console.error("Unable to check subscription status:", error);
+              console.error("Subscription check failed:", error);
               setIsSubscribed(false);
           }
       };
-      checkSubscription();
+      updateSubscriptionStatus();
   }, []);
 
   if (isSubscribed === null) {
