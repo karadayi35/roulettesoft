@@ -5,7 +5,7 @@ import { REVENUECAT_API_KEY } from "./config.js"; // RevenueCat API anahtarları
 
 const PaywallScreen = ({ navigation }) => {
     const [loading, setLoading] = useState(true);
-    const [isSubscribed, setIsSubscribed] = useState(false);
+    const [isSubscribed, setIsSubscribed] = useState(true);
 
     // ✅ **Kullanıcının abonelik durumunu kontrol et**
     const checkSubscriptionStatus = async () => {
