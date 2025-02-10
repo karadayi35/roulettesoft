@@ -150,7 +150,7 @@ const getPredictionPosition = (number) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#24272c', alignItems: 'center', paddingTop: 20 },
-  infoIcon: { position: 'absolute', top: -20, left: -25 },
+  infoIcon: { position: 'absolute', top: -30, left: -25 },
   infoText: { fontSize: 24, color: 'white' },
   imageContainer: {top: 70, flexDirection: 'row', alignItems: 'center',marginLeft: -80 },
   tableImage: { width: 400, height: 600, resizeMode: 'contain' },
