@@ -9,23 +9,29 @@ const PaywallScreen = ({ navigation }) => {
         try {
             setLoading(true);
             const offerings = await Purchases.getOfferings();
+
             if (offerings.current !== null) {
-                const packageToBuy = offerings.current.availablePackages.find(pkg => pkg.identifier === "monthly"); 
+                console.log("\ud83d\udccc Available Packages:", offerings.current.availablePackages);
+
+                const packageToBuy = offerings.current.availablePackages[0]; // İlk paketi al
                 if (packageToBuy) {
-                    const purchaseMade = await Purchases.purchasePackage(packageToBuy);
-                    if (purchaseMade) {
-                        console.log("Purchase successful:", purchaseMade);
+                    const { customerInfo } = await Purchases.purchasePackage(packageToBuy);
+
+                    if (customerInfo.entitlements.active["premium"]) {
+                        console.log("\u2705 Subscription successful!");
                         navigation.replace("Roulette");
+                    } else {
+                        alert("⚠️ Subscription not activated.");
                     }
                 } else {
-                    alert("No subscription package found");
+                    alert("⚠️ No valid subscription package found.");
                 }
             } else {
-                alert("Unable to retrieve subscription information from the server");
+                alert("⚠️ Unable to retrieve subscription information.");
             }
         } catch (error) {
-            console.error("Purchase error:", error);
-            alert("The purchase was unsuccessful");
+            console.error("❌ Purchase error:", error);
+            alert("⚠️ The purchase was unsuccessful. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -87,4 +93,3 @@ const styles = StyleSheet.create({
 });
 
 export default PaywallScreen;
-
