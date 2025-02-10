@@ -1,25 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Linking, ActivityIndicator } from 'react-native';
 import Purchases from "react-native-purchases";
+import { REVENUECAT_API_KEY } from "./config.js"; // RevenueCat API anahtarlarını buraya ekledik
 
 const PaywallScreen = ({ navigation }) => {
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [isSubscribed, setIsSubscribed] = useState(false);
 
+    // ✅ **Kullanıcının abonelik durumunu kontrol et**
+    const checkSubscriptionStatus = async () => {
+        try {
+            await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
+            const customerInfo = await Purchases.getCustomerInfo();
+            if (customerInfo.entitlements?.active?.["premium"]) {
+                console.log("✅ User is already subscribed!");
+                setIsSubscribed(true);
+                navigation.replace("Roulette"); // **Direkt yönlendirme**
+            } else {
+                setIsSubscribed(false);
+            }
+        } catch (error) {
+            console.error("❌ Subscription check failed:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        checkSubscriptionStatus();
+    }, []);
+
+    // **Eğer abonelik kontrolü devam ediyorsa loading göster**
+    if (loading) {
+        return (
+            <View style={styles.container}>
+                <ActivityIndicator size="large" color="yellow" />
+            </View>
+        );
+    }
+
+    // ✅ **Satın alma işlemi**
     const onSubscribe = async () => {
         try {
             setLoading(true);
             const offerings = await Purchases.getOfferings();
 
             if (offerings.current !== null) {
-                console.log("\ud83d\udccc Available Packages:", offerings.current.availablePackages);
+                console.log("📌 Available Packages:", offerings.current.availablePackages);
 
                 const packageToBuy = offerings.current.availablePackages[0]; // İlk paketi al
                 if (packageToBuy) {
                     const { customerInfo } = await Purchases.purchasePackage(packageToBuy);
 
                     if (customerInfo.entitlements.active["premium"]) {
-                        console.log("\u2705 Subscription successful!");
-                        navigation.replace("Roulette");
+                        console.log("✅ Subscription successful!");
+                        setIsSubscribed(true);
+                        navigation.replace("Roulette");  // **Başarıyla abone olunca yönlendir**
                     } else {
                         alert("⚠️ Subscription not activated.");
                     }

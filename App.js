@@ -3,8 +3,6 @@ import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Modal, Acti
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import PaywallScreen from './screens/PaywallScreen';
-import Purchases from "react-native-purchases";
-import { REVENUECAT_API_KEY } from "./config.js"; // RevenueCat API anahtarlarını buraya ekleyin.
 
 if (typeof global.setImmediate === 'undefined') {
     global.setImmediate = (fn, ...args) => setTimeout(fn, 0, ...args);
@@ -158,48 +156,10 @@ const getPredictionPosition = (number) => {
 };
 
 const App = () => {
-  const [isSubscribed, setIsSubscribed] = useState(null);
-  const navigation = useNavigation();  // Navigation ekledik
-
-  useEffect(() => {
-      Purchases.configure({ apiKey: REVENUECAT_API_KEY });  // Sadece 1 kere çağrılacak
-  }, []);
-
-  useEffect(() => {
-      const updateSubscriptionStatus = async () => {
-          try {
-              const customerInfo = await Purchases.getCustomerInfo();
-              if (customerInfo.entitlements?.active?.["premium"]) {
-                  console.log("✅ Subscription successful!");
-                  setIsSubscribed(true);
-                  navigation.replace("Roulette");  // Satın aldıysa yönlendir
-              } else {
-                  setIsSubscribed(false);
-              }
-          } catch (error) {
-              console.error("Subscription check failed:", error);
-              setIsSubscribed(false);
-          }
-      };
-      updateSubscriptionStatus();
-  }, []);
-
-  if (isSubscribed === null) {
-      return (
-          <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-              <ActivityIndicator size="large" color="yellow" />
-          </View>
-      );
-  }
-
   return (
       <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
-              {isSubscribed ? (
-                  <Stack.Screen name="Roulette" component={RoulettePredictor} />
-              ) : (
-                  <Stack.Screen name="Paywall" component={PaywallScreen} />
-              )}
+              <Stack.Screen name="Paywall" component={PaywallScreen} />
           </Stack.Navigator>
       </NavigationContainer>
   );
