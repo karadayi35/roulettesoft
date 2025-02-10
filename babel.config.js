@@ -4,5 +4,6 @@ module.exports = {
       '@babel/plugin-transform-private-methods',
       '@babel/plugin-transform-class-properties',
       '@babel/plugin-proposal-class-properties',
+      'react-native-reanimated/plugin', // Bunu ekledik ✅
     ],
-  };
+};
