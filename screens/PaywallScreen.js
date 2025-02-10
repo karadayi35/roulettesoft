@@ -10,8 +10,8 @@ const PaywallScreen = ({ navigation }) => {
     // ✅ **Kullanıcının abonelik durumunu kontrol et**
     const checkSubscriptionStatus = async () => {
         try {
-           // await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
-          //  const customerInfo = await Purchases.getCustomerInfo();
+            await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
+            const customerInfo = await Purchases.getCustomerInfo();
             if (customerInfo.entitlements?.active?.["premium"]) {
                 console.log("✅ User is already subscribed!");
                 setIsSubscribed(true);
@@ -72,7 +72,19 @@ const PaywallScreen = ({ navigation }) => {
             setLoading(false);
         }
     };
-
+    const PaywallScreen = ({ navigation }) => {
+        useEffect(() => {
+            setTimeout(() => {
+                navigation.replace("Roulette"); // Zorla yönlendir
+            }, 500); // 0.5 saniye sonra geçiş yap
+        }, []);
+    
+        return (
+            <View>
+                <Text>Loading...</Text>
+            </View>
+        );
+    };
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Roulette Private Predictor</Text>
