@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Linking, ActivityIndicator } from 'react-native';
 import Purchases from "react-native-purchases";
-import { REVENUECAT_API_KEY } from "./screens/config.js";
+import { REVENUECAT_API_KEY } from "./config";
+
 
 
 const PaywallScreen = ({ navigation }) => {
