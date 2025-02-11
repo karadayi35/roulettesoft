@@ -4,11 +4,11 @@
     "slug": "roulettesoft",
     "version": "2.2.2",
     "orientation": "portrait",
-    "icon": ".screens/assets/icon.png",
+    "icon": "./screens/assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": ".screens/assets/splash-icon.png",
+      "image": "./screens/assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#1d1d1b"
     },
@@ -24,7 +24,7 @@
       }
     },
     "web": {
-      "favicon": ".screens/assets/favicon.png"
+      "favicon": "./screens/assets/favicon.png"
     },
     "extra": {
       "eas": {
