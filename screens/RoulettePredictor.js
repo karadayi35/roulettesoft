@@ -79,22 +79,24 @@ const RoulettePredictor = () => {
                 </TouchableOpacity>
             </View>
 
+            {/* How to Play Button */}
             <TouchableOpacity style={styles.infoIcon} onPress={() => setShowHowToPlay(true)}>
                 <Text style={styles.infoText}>ℹ️</Text>
             </TouchableOpacity>
 
+            {/* Modal */}
             <Modal visible={showHowToPlay} transparent={true} animationType="slide">
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
                         <Text style={styles.modalTitle}>How to Play?</Text>
-                        <View style={styles.modalTextContainer}>
-                            <Text style={styles.modalText}>✅ Enter the last number and press the <Text style={styles.boldText}>"Add"</Text> button.</Text>
-                            <Text style={styles.modalText}>✅ Yellow circles indicate predicted numbers.</Text>
-                            <Text style={styles.modalText}>✅ Press <Text style={styles.boldText}>"Clear"</Text> to remove all entries.</Text>
-                            <Text style={styles.modalText}>✅ Tap <Text style={styles.boldText}>"Delete"</Text> to remove the last entered number.</Text>
-                        </View>
+                        <Text style={styles.modalText}>✅ Enter the last number and press the <Text style={styles.boldText}>"Add"</Text> button.</Text>
+                        <Text style={styles.modalText}>✅ Yellow circles indicate predicted numbers.</Text>
+                        <Text style={styles.modalText}>✅ Press <Text style={styles.boldText}>"Clear"</Text> to remove all entries.</Text>
+                        <Text style={styles.modalText}>✅ Tap <Text style={styles.boldText}>"Delete"</Text> to remove the last entered number.</Text>
+
+                        {/* Close Button */}
                         <TouchableOpacity style={styles.closeButton} onPress={() => setShowHowToPlay(false)}>
-                            <Text style={styles.buttonText}>Close</Text>
+                            <Text style={styles.closeButtonText}>Close</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -150,9 +152,8 @@ const getPredictionPosition = (number) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#24272c', alignItems: 'center', paddingTop: 20 },
-  infoIcon: { position: 'absolute', top: -30, left: -25 },
-  infoText: { fontSize: 24, color: 'white' },
-  imageContainer: {top: 70, flexDirection: 'row', alignItems: 'center',marginLeft: -80 },
+  infoIcon: { position: 'absolute', bottom: 30, right: 20, backgroundColor: '#FFCC00', padding: 12, borderRadius: 50, elevation: 5 },
+  infoText: { fontSize: 24, color: 'black', fontWeight: 'bold' },  imageContainer: {top: 70, flexDirection: 'row', alignItems: 'center',marginLeft: -80 },
   tableImage: { width: 400, height: 600, resizeMode: 'contain' },
   predictionContainer: { position: 'absolute', top: 73, left: 15 },
   greenCircle: { width: 9, height: 9, borderRadius: 10, backgroundColor: 'yellow', position: 'absolute', zIndex: 2 },
@@ -162,10 +163,9 @@ const styles = StyleSheet.create({
   buttonContainer: { top: 80,flexDirection: 'row', marginTop: 10 },
   button: { backgroundColor: '#141414', padding: 10, margin: 5 },
   buttonText: { color: 'yellow', fontWeight: 'bold' },
-  modalContainer: {  flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center' },
-  modalContent: {  backgroundColor: 'white', padding: 20, borderRadius: 10, width: '80%', alignItems: 'center' },
-  modalTitle: {  fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
-  modalText: {fontWeight:'bold', fontSize: 16, marginBottom: 15 },
+  modalContainer: { backgroundColor: 'white', padding: 25, borderRadius: 15, width: '85%', alignItems: 'center' },  modalContent: {  backgroundColor: 'white', padding: 20, borderRadius: 10, width: '80%', alignItems: 'center' },
+  modalTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 15, color: 'black' },
+  modalText: { fontSize: 16, fontWeight: '400', textAlign: 'center', marginBottom: 10 },
   closeButton: { backgroundColor: 'black', padding: 10, borderRadius: 5, marginTop: 10 }
 });
 
