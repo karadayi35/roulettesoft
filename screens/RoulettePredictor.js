@@ -151,8 +151,7 @@ const getPredictionPosition = (number) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#24272c', alignItems: 'center', paddingTop: 20 },
-  infoIcon: { position: 'absolute', bottom: 30, right: 20, backgroundColor: '#FFCC00', padding: 12, borderRadius: 50, elevation: 5 },
-  infoText: { fontSize: 24, color: 'black', fontWeight: 'bold' },  imageContainer: {top: 70, flexDirection: 'row', alignItems: 'center',marginLeft: -80 },
+  infoIcon: { position: 'absolute', bottom: 90, left: '50%', transform: [{ translateX: -25 }], backgroundColor: '#FFCC00', padding: 12, borderRadius: 50, elevation: 5 },  infoText: { fontSize: 24, color: 'black', fontWeight: 'bold' },  imageContainer: {top: 70, flexDirection: 'row', alignItems: 'center',marginLeft: -80 },
   tableImage: { width: 400, height: 600, resizeMode: 'contain' },
   predictionContainer: { position: 'absolute', top: 73, left: 15 },
   greenCircle: { width: 9, height: 9, borderRadius: 10, backgroundColor: 'yellow', position: 'absolute', zIndex: 2 },
@@ -163,9 +162,10 @@ const styles = StyleSheet.create({
   button: { backgroundColor: '#141414', padding: 10, margin: 5 },
   buttonText: { color: 'yellow', fontWeight: 'bold' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center' },
-  modalContainer: { backgroundColor: 'white', padding: 25, borderRadius: 15, width: '85%' },
-  modalTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 15, color: 'black', textAlign: 'center' },
-  modalText: { fontSize: 16, fontWeight: '400', textAlign: 'left', marginBottom: 10 },  closeButton: { backgroundColor: 'white', padding: 10, borderRadius: 5, marginTop: 10 }
-});
+  modalContainer: { backgroundColor: 'white', padding: 25, borderRadius: 15, width: '85%', alignItems: 'center' },
+  modalTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 15, color: 'black' },
+  modalText: { fontSize: 16, fontWeight: '400', textAlign: 'left', marginBottom: 10, width: '100%' },
+  closeButton: { marginTop: 20, backgroundColor: 'black', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 10 },
+  closeButtonText: { color: 'white', fontSize: 18, fontWeight: 'bold' }});
 
 export default RoulettePredictor;
