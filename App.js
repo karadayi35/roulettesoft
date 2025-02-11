@@ -5,7 +5,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import PaywallScreen from './screens/PaywallScreen';
 import RoulettePredictor from './screens/RoulettePredictor';
 import Purchases from "react-native-purchases";
-import { REVENUECAT_API_KEY } from ".screens/config.js"; // RevenueCat API Key
+import { REVENUECAT_API_KEY } from ".screens/config.js";
+
 
 const Stack = createStackNavigator();
 
