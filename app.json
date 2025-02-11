@@ -2,7 +2,7 @@
   "expo": {
     "name": "roulettesoft",
     "slug": "roulettesoft",
-    "version": "2.2.2",
+    "version": "3.0.0",
     "orientation": "portrait",
     "icon": "./screens/assets/icon.png",
     "userInterfaceStyle": "light",
