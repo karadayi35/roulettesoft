@@ -89,11 +89,10 @@ const RoulettePredictor = () => {
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContainer}>
                         <Text style={styles.modalTitle}>How to Play?</Text>
-                        <Text style={styles.modalText}>✅ Enter the last number and press the <Text style={styles.boldText}>"Add"</Text> button.</Text>
-                        <Text style={styles.modalText}>✅ Yellow circles indicate predicted numbers.</Text>
-                        <Text style={styles.modalText}>✅ Press <Text style={styles.boldText}>"Clear"</Text> to remove all entries.</Text>
-                        <Text style={styles.modalText}>✅ Tap <Text style={styles.boldText}>"Delete"</Text> to remove the last entered number.</Text>
-
+                        <Text style={styles.modalText}>Enter the last number and press the "Add" button.</Text>
+                        <Text style={styles.modalText}>Yellow circles indicate predicted numbers.</Text>
+                        <Text style={styles.modalText}>Press "Clear" to remove all entries.</Text>
+                        <Text style={styles.modalText}>Tap "Delete" to remove the last entered number.</Text>
                         {/* Close Button */}
                         <TouchableOpacity style={styles.closeButton} onPress={() => setShowHowToPlay(false)}>
                             <Text style={styles.closeButtonText}>Close</Text>
@@ -163,10 +162,10 @@ const styles = StyleSheet.create({
   buttonContainer: { top: 80,flexDirection: 'row', marginTop: 10 },
   button: { backgroundColor: '#141414', padding: 10, margin: 5 },
   buttonText: { color: 'yellow', fontWeight: 'bold' },
-  modalContainer: { backgroundColor: 'white', padding: 25, borderRadius: 15, width: '85%', alignItems: 'center' },  modalContent: {  backgroundColor: 'white', padding: 20, borderRadius: 10, width: '80%', alignItems: 'center' },
-  modalTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 15, color: 'black' },
-  modalText: { fontSize: 16, fontWeight: '400', textAlign: 'center', marginBottom: 10 },
-  closeButton: { backgroundColor: 'black', padding: 10, borderRadius: 5, marginTop: 10 }
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center' },
+  modalContainer: { backgroundColor: 'white', padding: 25, borderRadius: 15, width: '85%' },
+  modalTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 15, color: 'black', textAlign: 'center' },
+  modalText: { fontSize: 16, fontWeight: '400', textAlign: 'left', marginBottom: 10 },  closeButton: { backgroundColor: 'black', padding: 10, borderRadius: 5, marginTop: 10 }
 });
 
 export default RoulettePredictor;
