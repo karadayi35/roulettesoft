@@ -1,34 +1,53 @@
-import React, { useEffect } from 'react';
-import { View, Text } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import PaywallScreen from './screens/PaywallScreen';
 import RoulettePredictor from './screens/RoulettePredictor';
+import Purchases from "react-native-purchases";
+import { REVENUECAT_API_KEY } from ".screens/config.js"; // RevenueCat API Key
 
 const Stack = createStackNavigator();
 
 const App = () => {
+    const [isSubscribed, setIsSubscribed] = useState(null);
+
+    useEffect(() => {
+        const checkSubscriptionStatus = async () => {
+            try {
+                await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
+                const customerInfo = await Purchases.getCustomerInfo();
+                if (customerInfo.entitlements?.active?.["premium"]) {
+                    setIsSubscribed(true);
+                } else {
+                    setIsSubscribed(false);
+                }
+            } catch (error) {
+                console.error("Subscription check failed:", error);
+                setIsSubscribed(false);
+            }
+        };
+        checkSubscriptionStatus();
+    }, []);
+
+    if (isSubscribed === null) {
+        return (
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <ActivityIndicator size="large" color="yellow" />
+            </View>
+        );
+    }
+
     return (
         <NavigationContainer>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="Redirect" component={RedirectScreen} />
-                <Stack.Screen name="Roulette" component={RoulettePredictor} />
+                {isSubscribed ? (
+                    <Stack.Screen name="Roulette" component={RoulettePredictor} />
+                ) : (
+                    <Stack.Screen name="Paywall" component={PaywallScreen} />
+                )}
             </Stack.Navigator>
         </NavigationContainer>
-    );
-};
-
-// ✅ **Geçici yönlendirme ekranı**
-const RedirectScreen = ({ navigation }) => {
-    useEffect(() => {
-        setTimeout(() => {
-            navigation.replace("Roulette");  // **Otomatik yönlendir**
-        }, 1000); // **1 saniye bekleyip yönlendirme yap**
-    }, []);
-
-    return (
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "black" }}>
-            <Text style={{ color: "yellow", fontSize: 20 }}>Loading...</Text>
-        </View>
     );
 };
 
