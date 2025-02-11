@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center' },
   modalContainer: { backgroundColor: 'white', padding: 25, borderRadius: 15, width: '85%' },
   modalTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 15, color: 'white', textAlign: 'center' },
-  modalText: { fontSize: 16, fontWeight: '400', textAlign: 'left', marginBottom: 10 },  closeButton: { backgroundColor: 'black', padding: 10, borderRadius: 5, marginTop: 10 }
+  modalText: { fontSize: 16, fontWeight: '400', textAlign: 'left', marginBottom: 10 },  closeButton: { backgroundColor: 'white', padding: 10, borderRadius: 5, marginTop: 10 }
 });
 
 export default RoulettePredictor;
