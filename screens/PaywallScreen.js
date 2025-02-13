@@ -11,22 +11,28 @@ const PaywallScreen = ({ navigation }) => {
     useEffect(() => {
         StatusBar.setTranslucent(true);
         StatusBar.setBackgroundColor("transparent");
-        StatusBar.setBarStyle("light-content"); // light-content veya dark-content olarak değiştirilebilir
+        StatusBar.setBarStyle("light-content");
     }, []);
 
     // ✅ **Abonelik durumunu kontrol et**
     const checkSubscriptionStatus = async () => {
         try {
+            console.log("🔍 Abonelik durumu kontrol ediliyor...");
             const customerInfo = await Purchases.getCustomerInfo();
-            if (customerInfo.entitlements?.active?.["premium"]) {
-                console.log("✅ User is already subscribed!");
+            console.log("📌 RevenueCat Yanıtı:", customerInfo);
+
+            const isActive = customerInfo?.entitlements?.active?.["vip_access_1month"]; // 🔹 Kesin abonelik kontrolü
+
+            if (isActive) {
+                console.log("✅ Kullanıcı zaten abone! Hemen yönlendiriliyor...");
                 setIsSubscribed(true);
-                navigation.replace("Roulette");
-            } else {
-                setIsSubscribed(false);
-            }
+                navigation.reset({ index: 0, routes: [{ name: "Roulette" }] }); // 🔹 **Kesin yönlendirme**
+                return;
+            } 
+
+            setIsSubscribed(false);
         } catch (error) {
-            console.error("❌ Subscription check failed:", error);
+            console.error("❌ Abonelik kontrolü başarısız:", error);
         } finally {
             setLoading(false);
         }
@@ -49,31 +55,33 @@ const PaywallScreen = ({ navigation }) => {
     const onSubscribe = async () => {
         try {
             setLoading(true);
+            console.log("🛒 Abonelik satın alma işlemi başlatılıyor...");
             const offerings = await Purchases.getOfferings();
 
             if (offerings.current !== null) {
-                console.log("📌 Available Packages:", offerings.current.availablePackages);
+                console.log("📌 Mevcut Paketler:", offerings.current.availablePackages);
 
                 const packageToBuy = offerings.current.availablePackages[0]; // İlk paketi al
                 if (packageToBuy) {
                     const { customerInfo } = await Purchases.purchasePackage(packageToBuy);
+                    const isActive = customerInfo?.entitlements?.active?.["vip_access_1month"];
 
-                    if (customerInfo.entitlements.active["premium"]) {
-                        console.log("✅ Subscription successful!");
+                    if (isActive) {
+                        console.log("✅ Satın alma başarılı! Hemen yönlendiriliyor...");
                         setIsSubscribed(true);
-                        navigation.replace("Roulette");
+                        navigation.reset({ index: 0, routes: [{ name: "Roulette" }] });
                     } else {
-                        alert("⚠️ Subscription not activated.");
+                        alert("⚠️ Abonelik etkinleştirilemedi.");
                     }
                 } else {
-                    alert("⚠️ No valid subscription package found.");
+                    alert("⚠️ Geçerli bir abonelik paketi bulunamadı.");
                 }
             } else {
-                alert("⚠️ Unable to retrieve subscription information.");
+                alert("⚠️ Abonelik bilgileri alınamadı.");
             }
         } catch (error) {
-            console.error("❌ Purchase error:", error);
-            alert("⚠️ The purchase was unsuccessful. Please try again.");
+            console.error("❌ Satın alma hatası:", error);
+            alert("⚠️ Satın alma başarısız. Lütfen tekrar deneyin.");
         } finally {
             setLoading(false);
         }
