@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, StatusBar } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import PaywallScreen from './screens/PaywallScreen';
-import RoulettePredictor from './screens/RoulettePredictor';
+import React, { useEffect, useState } from "react";
+import { View, ActivityIndicator, StatusBar } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import PaywallScreen from "./screens/PaywallScreen";
+import RoulettePredictor from "./screens/RoulettePredictor";
 import Purchases from "react-native-purchases";
 import { REVENUECAT_API_KEY } from "./screens/config.js";
 
@@ -13,28 +13,36 @@ const App = () => {
     const [isSubscribed, setIsSubscribed] = useState(null);
 
     useEffect(() => {
-        const checkSubscriptionStatus = async () => {
+        const initPurchases = async () => {
             try {
-                await Purchases.configure(REVENUECAT_API_KEY);
+                console.log("🛠 RevenueCat yapılandırılıyor...");
+                Purchases.configure({ apiKey: REVENUECAT_API_KEY }); // ✅ Doğru format
+
+                console.log("🔍 Kullanıcı abonelik durumu kontrol ediliyor...");
                 const customerInfo = await Purchases.getCustomerInfo();
-                if (customerInfo.entitlements?.active?.["premium"]) {
+                console.log("📌 RevenueCat Yanıtı:", customerInfo);
+
+                if (customerInfo?.entitlements?.active?.["vip_access_1month"]) {
+                    console.log("✅ Kullanıcı zaten abone!");
                     setIsSubscribed(true);
                 } else {
+                    console.log("🚫 Kullanıcı abone değil.");
                     setIsSubscribed(false);
                 }
             } catch (error) {
-                console.error("Subscription check failed:", error);
+                console.error("❌ Abonelik kontrolü başarısız:", error);
                 setIsSubscribed(false);
             }
         };
-        checkSubscriptionStatus();
+
+        initPurchases();
     }, []);
 
-    // Status Bar ve Fullscreen Yönetimi (Android 15 için güncellendi)
+    // ✅ **Status Bar ve Fullscreen Yönetimi (Android 15 için güncellendi)**
     useEffect(() => {
         StatusBar.setTranslucent(true);
         StatusBar.setBackgroundColor("transparent");
-        StatusBar.setBarStyle("light-content"); // Eğer koyu tema kullanıyorsanız "dark-content" olarak değiştirin.
+        StatusBar.setBarStyle("light-content");
     }, []);
 
     if (isSubscribed === null) {

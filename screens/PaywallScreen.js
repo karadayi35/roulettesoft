@@ -1,44 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Linking, ActivityIndicator, StatusBar } from 'react-native';
 import Purchases from "react-native-purchases";
-import { REVENUECAT_API_KEY, PRODUCT_ID } from "./config"; // ✅ DOĞRU YOLDA İÇE AKTAR
+import { REVENUECAT_API_KEY, PRODUCT_ID } from "./config"; 
 
 const PaywallScreen = ({ navigation }) => {
     const [loading, setLoading] = useState(true);
     const [isSubscribed, setIsSubscribed] = useState(false);
 
-    // ✅ **Status Bar ve Tam Ekran Yönetimi**
+    // ✅ **RevenueCat Yapılandırması (İlk Çalıştırma)**
     useEffect(() => {
-        StatusBar.setTranslucent(true);
-        StatusBar.setBackgroundColor("transparent");
-        StatusBar.setBarStyle("light-content");
-    }, []);
+        Purchases.configure({ apiKey: REVENUECAT_API_KEY });
 
-    // ✅ **Abonelik durumunu kontrol et**
-    const checkSubscriptionStatus = async () => {
-        try {
-            console.log("🔍 Abonelik durumu kontrol ediliyor...");
-            const customerInfo = await Purchases.getCustomerInfo();
-            console.log("📌 RevenueCat Yanıtı:", customerInfo);
+        const checkSubscriptionStatus = async () => {
+            try {
+                console.log("🔍 Abonelik durumu kontrol ediliyor...");
+                const customerInfo = await Purchases.getCustomerInfo();
+                console.log("📌 RevenueCat Yanıtı:", customerInfo);
 
-            const isActive = customerInfo?.entitlements?.active?.[PRODUCT_ID]; // ✅ DOĞRU KONTROL
+                const isActive = customerInfo.entitlements.active?.["premium"]; // ✅ DOĞRU KONTROL
 
-            if (isActive) {
-                console.log("✅ Kullanıcı zaten abone! Yönlendiriliyor...");
-                setIsSubscribed(true);
-                navigation.reset({ index: 0, routes: [{ name: "Roulette" }] }); // 🔹 **Kesin yönlendirme**
-                return;
+                if (isActive) {
+                    console.log("✅ Kullanıcı zaten abone! Yönlendiriliyor...");
+                    setIsSubscribed(true);
+                    navigation.reset({ index: 0, routes: [{ name: "Roulette" }] }); // 🔹 **Kesin yönlendirme**
+                } else {
+                    setIsSubscribed(false);
+                }
+            } catch (error) {
+                console.error("❌ Abonelik kontrolü başarısız:", error);
+            } finally {
+                setLoading(false);
             }
+        };
 
-            setIsSubscribed(false);
-        } catch (error) {
-            console.error("❌ Abonelik kontrolü başarısız:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
         checkSubscriptionStatus();
     }, []);
 
@@ -58,25 +52,23 @@ const PaywallScreen = ({ navigation }) => {
             console.log("🛒 Abonelik satın alma işlemi başlatılıyor...");
             const offerings = await Purchases.getOfferings();
 
-            if (!offerings || !offerings.current) {
+            if (!offerings.current) {
                 alert("⚠️ Abonelik paketi bulunamadı. RevenueCat yapılandırmasını kontrol edin.");
                 return;
             }
 
             console.log("📌 Mevcut Paketler:", offerings.current.availablePackages);
 
-            // ✅ Doğru paketi bul
-            const packageToBuy = offerings.current.availablePackages.find(
-                (pkg) => pkg.product.identifier === PRODUCT_ID
-            );
+            // ✅ Doğru paketi seç
+            const packageToBuy = offerings.current.availablePackages[0];
 
             if (!packageToBuy) {
-                alert("⚠️ Abonelik paketi tanımlanmadı. Lütfen RevenueCat ayarlarını kontrol edin.");
+                alert("⚠️ Geçerli bir abonelik paketi bulunamadı.");
                 return;
             }
 
             const { customerInfo } = await Purchases.purchasePackage(packageToBuy);
-            const isActive = customerInfo?.entitlements?.active?.[PRODUCT_ID];
+            const isActive = customerInfo.entitlements.active?.["premium"];
 
             if (isActive) {
                 console.log("✅ Satın alma başarılı! Hemen yönlendiriliyor...");
