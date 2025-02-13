@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import PaywallScreen from './screens/PaywallScreen';
 import RoulettePredictor from './screens/RoulettePredictor';
 import Purchases from "react-native-purchases";
 import { REVENUECAT_API_KEY } from "./screens/config.js";
-
 
 const Stack = createStackNavigator();
 
@@ -16,7 +15,7 @@ const App = () => {
     useEffect(() => {
         const checkSubscriptionStatus = async () => {
             try {
-                await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
+                await Purchases.configure(REVENUECAT_API_KEY);
                 const customerInfo = await Purchases.getCustomerInfo();
                 if (customerInfo.entitlements?.active?.["premium"]) {
                     setIsSubscribed(true);
@@ -29,6 +28,13 @@ const App = () => {
             }
         };
         checkSubscriptionStatus();
+    }, []);
+
+    // Status Bar ve Fullscreen Yönetimi (Android 15 için güncellendi)
+    useEffect(() => {
+        StatusBar.setTranslucent(true);
+        StatusBar.setBackgroundColor("transparent");
+        StatusBar.setBarStyle("light-content"); // Eğer koyu tema kullanıyorsanız "dark-content" olarak değiştirin.
     }, []);
 
     if (isSubscribed === null) {

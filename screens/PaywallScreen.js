@@ -1,23 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Linking, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Linking, ActivityIndicator, StatusBar } from 'react-native';
 import Purchases from "react-native-purchases";
 import { REVENUECAT_API_KEY } from "./config";
-
-
 
 const PaywallScreen = ({ navigation }) => {
     const [loading, setLoading] = useState(true);
     const [isSubscribed, setIsSubscribed] = useState(false);
 
-    // ✅ **Kullanıcının abonelik durumunu kontrol et**
+    // ✅ **Status Bar ve Tam Ekran Yönetimi**
+    useEffect(() => {
+        StatusBar.setTranslucent(true);
+        StatusBar.setBackgroundColor("transparent");
+        StatusBar.setBarStyle("light-content"); // light-content veya dark-content olarak değiştirilebilir
+    }, []);
+
+    // ✅ **Abonelik durumunu kontrol et**
     const checkSubscriptionStatus = async () => {
         try {
-            await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
             const customerInfo = await Purchases.getCustomerInfo();
             if (customerInfo.entitlements?.active?.["premium"]) {
                 console.log("✅ User is already subscribed!");
                 setIsSubscribed(true);
-                navigation.replace("Roulette"); // **Direkt yönlendirme**
+                navigation.replace("Roulette");
             } else {
                 setIsSubscribed(false);
             }
@@ -57,7 +61,7 @@ const PaywallScreen = ({ navigation }) => {
                     if (customerInfo.entitlements.active["premium"]) {
                         console.log("✅ Subscription successful!");
                         setIsSubscribed(true);
-                        navigation.replace("Roulette");  // **Başarıyla abone olunca yönlendir**
+                        navigation.replace("Roulette");
                     } else {
                         alert("⚠️ Subscription not activated.");
                     }
@@ -74,7 +78,7 @@ const PaywallScreen = ({ navigation }) => {
             setLoading(false);
         }
     };
-    
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Roulette Private Predictor</Text>

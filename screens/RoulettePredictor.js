@@ -1,12 +1,19 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Modal, StatusBar } from 'react-native';
 
 const RoulettePredictor = () => {
     const [lastNumber, setLastNumber] = useState('');
     const [predictions, setPredictions] = useState([]);
-    const [lastNumbersList, setLastNumbersList] = useState([]); // Girilen sayıları tutan state
+    const [lastNumbersList, setLastNumbersList] = useState([]); 
     const [initialEntries, setInitialEntries] = useState(0);
     const [showHowToPlay, setShowHowToPlay] = useState(false);
+
+    // ✅ **Status Bar ve Tam Ekran Yönetimi**
+    useEffect(() => {
+        StatusBar.setTranslucent(true);
+        StatusBar.setBackgroundColor("transparent");
+        StatusBar.setBarStyle("light-content"); // Eğer koyu tema kullanıyorsanız "dark-content" olarak değiştirin
+    }, []);
 
     const generatePredictions = () => {
         const number = parseInt(lastNumber);
@@ -23,10 +30,10 @@ const RoulettePredictor = () => {
             }
         }
 
-        setLastNumbersList([number, ...lastNumbersList]); // Girilen sayıyı listeye ekle
-        setLastNumber(''); // Input'u temizle
+        setLastNumbersList([number, ...lastNumbersList]); 
+        setLastNumber(''); 
         setInitialEntries(prev => prev + 1);
-        if (initialEntries >= 4) { // 5. girişten sonra tahminleri göster
+        if (initialEntries >= 4) { 
             setPredictions(newPredictions);
         }
     };
@@ -79,12 +86,10 @@ const RoulettePredictor = () => {
                 </TouchableOpacity>
             </View>
 
-            {/* How to Play Button */}
             <TouchableOpacity style={styles.infoIcon} onPress={() => setShowHowToPlay(true)}>
                 <Text style={styles.infoText}>ℹ️</Text>
             </TouchableOpacity>
 
-            {/* Modal */}
             <Modal visible={showHowToPlay} transparent={true} animationType="slide">
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContainer}>
@@ -93,7 +98,6 @@ const RoulettePredictor = () => {
                         <Text style={styles.modalText}>Yellow circles indicate predicted numbers.</Text>
                         <Text style={styles.modalText}>Press "Clear" to remove all entries.</Text>
                         <Text style={styles.modalText}>Tap "Delete" to remove the last entered number.</Text>
-                        {/* Close Button */}
                         <TouchableOpacity style={styles.closeButton} onPress={() => setShowHowToPlay(false)}>
                             <Text style={styles.closeButtonText}>Close</Text>
                         </TouchableOpacity>
@@ -105,67 +109,27 @@ const RoulettePredictor = () => {
 };
 
 const getPredictionPosition = (number) => {
-    const positions = {
-        0: { top: 34, left: 165 },
-        1: { top: 70, left: 125 },
-        2: { top: 70, left: 167 },
-        3: { top: 70, left: 210 },
-        4: { top: 115, left: 125 },
-        5: { top: 115, left: 167 },
-        6: { top: 115, left: 210 },
-        7: { top: 160, left: 125 },
-        8: { top: 160, left: 167 },
-        9: { top: 167, left: 210 },
-        10: { top: 200, left: 125 },
-        11: { top: 200, left: 167 },
-        12: { top: 200, left: 210 },
-        13: { top: 245, left: 125 },
-        14: { top: 245, left: 167 },
-        15: { top: 245, left: 210 },
-        16: { top: 285, left: 125 },
-        17: { top: 285, left: 167 },
-        18: { top: 285, left: 210 },
-        19: { top: 330, left: 125 },
-        20: { top: 330, left: 167 },
-        21: { top: 330, left: 210},
-        22: { top: 375, left: 125 },
-        23: { top: 375, left: 167 },
-        24: { top: 375, left: 210 },
-        25: { top: 415, left: 125 },
-        26: { top: 415, left: 167 },
-        27: { top: 415, left: 210 },
-        28: { top: 460, left: 125 },
-        29: { top: 460, left: 167 },
-        30: { top: 460, left: 210 },
-        31: { top: 500, left: 125 },
-        32: { top: 500, left: 167 },
-        33: { top: 500, left: 210 },
-        34: { top: 545, left: 125 },
-        35: { top: 545, left: 167 },
-        36: { top: 545, left: 210 },
-    };
-    return positions[number] || { top: 0, left: 0 };
+    const basePositions = [
+        { top: 34, left: 165 }, { top: 70, left: 125 }, { top: 70, left: 167 }, { top: 70, left: 210 },
+        { top: 115, left: 125 }, { top: 115, left: 167 }, { top: 115, left: 210 }, { top: 160, left: 125 },
+        { top: 160, left: 167 }, { top: 167, left: 210 }, { top: 200, left: 125 }, { top: 200, left: 167 },
+        { top: 200, left: 210 }, { top: 245, left: 125 }, { top: 245, left: 167 }, { top: 245, left: 210 },
+        { top: 285, left: 125 }, { top: 285, left: 167 }, { top: 285, left: 210 }, { top: 330, left: 125 },
+        { top: 330, left: 167 }, { top: 330, left: 210 }, { top: 375, left: 125 }, { top: 375, left: 167 },
+        { top: 375, left: 210 }, { top: 415, left: 125 }, { top: 415, left: 167 }, { top: 415, left: 210 }
+    ];
+    return basePositions[number] || { top: 0, left: 0 };
 };
-
-
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#24272c', alignItems: 'center', paddingTop: 20 },
-  infoIcon: { position: 'absolute', bottom: 90, left: '50%', transform: [{ translateX: -25 }], backgroundColor: '#FFCC00', padding: 12, borderRadius: 50, elevation: 5 },  infoText: { fontSize: 24, color: 'black', fontWeight: 'bold' },  imageContainer: {top: 70, flexDirection: 'row', alignItems: 'center',marginLeft: -80 },
+  infoIcon: { position: 'absolute', bottom: 90, left: '50%', transform: [{ translateX: -25 }], backgroundColor: '#FFCC00', padding: 12, borderRadius: 50, elevation: 5 },  
+  infoText: { fontSize: 24, color: 'black', fontWeight: 'bold' },  
+  imageContainer: {top: 70, flexDirection: 'row', alignItems: 'center',marginLeft: -80 },
   tableImage: { width: 400, height: 600, resizeMode: 'contain' },
-  predictionContainer: { position: 'absolute', top: 73, left: 15 },
-  greenCircle: { width: 9, height: 9, borderRadius: 10, backgroundColor: 'yellow', position: 'absolute', zIndex: 2 },
-  lastNumbersBox: { backgroundColor: '#141414', padding: 10,top:10, borderRadius: 5, marginLeft: -80, width: 60, height:550, alignItems: 'center' },
+  lastNumbersBox: { backgroundColor: '#141414', padding: 10, top: 10, borderRadius: 5, marginLeft: -80, width: 60, height:550, alignItems: 'center' },
   lastNumberText: { fontSize: 20, color: 'yellow', textAlign: 'center',fontWeight:'bold' },
-  input: { fontWeight:'bold',top: -600,width: 100, height: 40, backgroundColor: 'white', textAlign: 'center', fontSize: 19, marginTop: 20 },
-  buttonContainer: { top: 80,flexDirection: 'row', marginTop: 10 },
-  button: { backgroundColor: '#141414', padding: 10, margin: 5 },
-  buttonText: { color: 'yellow', fontWeight: 'bold' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center' },
-  modalContainer: { backgroundColor: 'white', padding: 25, borderRadius: 15, width: '85%', alignItems: 'center' },
-  modalTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 15, color: 'black' },
-  modalText: { fontSize: 16, fontWeight: '400', textAlign: 'left', marginBottom: 10, width: '100%' },
-  closeButton: { marginTop: 20, backgroundColor: 'black', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 10 },
-  closeButtonText: { color: 'white', fontSize: 18, fontWeight: 'bold' }});
+  input: { fontWeight:'bold', top: -600, width: 100, height: 40, backgroundColor: 'white', textAlign: 'center', fontSize: 19, marginTop: 20 }
+});
 
 export default RoulettePredictor;
