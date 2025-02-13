@@ -1,130 +1,169 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Linking, ActivityIndicator, StatusBar } from 'react-native';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Linking,
+  ActivityIndicator,
+  StatusBar,
+} from "react-native";
 import Purchases from "react-native-purchases";
-import { REVENUECAT_API_KEY } from "./config";
+
+// ✅ `config.js` dosyasını default ve named export ile içe aktardık.
+import Config, { REVENUECAT_API_KEY, PRODUCT_ID } from "./config";
 
 const PaywallScreen = ({ navigation }) => {
-    const [loading, setLoading] = useState(true);
-    const [isSubscribed, setIsSubscribed] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
-    // ✅ **Status Bar ve Tam Ekran Yönetimi**
-    useEffect(() => {
-        StatusBar.setTranslucent(true);
-        StatusBar.setBackgroundColor("transparent");
-        StatusBar.setBarStyle("light-content");
-    }, []);
+  // ✅ **Status Bar ve Tam Ekran Yönetimi**
+  useEffect(() => {
+    StatusBar.setTranslucent(true);
+    StatusBar.setBackgroundColor("transparent");
+    StatusBar.setBarStyle("light-content");
+  }, []);
 
-    // ✅ **Abonelik durumunu kontrol et**
-    const checkSubscriptionStatus = async () => {
-        try {
-            console.log("🔍 Abonelik durumu kontrol ediliyor...");
-            const customerInfo = await Purchases.getCustomerInfo();
-            console.log("📌 RevenueCat Yanıtı:", customerInfo);
+  // ✅ **Abonelik durumunu kontrol et**
+  const checkSubscriptionStatus = async () => {
+    try {
+      console.log("🔍 Abonelik durumu kontrol ediliyor...");
+      await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
 
-            const isActive = customerInfo?.entitlements?.active?.["vip_access_1month"]; // 🔹 Kesin abonelik kontrolü
+      const customerInfo = await Purchases.getCustomerInfo();
+      console.log("📌 RevenueCat Yanıtı:", customerInfo);
 
-            if (isActive) {
-                console.log("✅ Kullanıcı zaten abone! Hemen yönlendiriliyor...");
-                setIsSubscribed(true);
-                navigation.reset({ index: 0, routes: [{ name: "Roulette" }] }); // 🔹 **Kesin yönlendirme**
-                return;
-            } 
+      const isActive = customerInfo?.entitlements?.active?.[PRODUCT_ID];
 
-            setIsSubscribed(false);
-        } catch (error) {
-            console.error("❌ Abonelik kontrolü başarısız:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+      if (isActive) {
+        console.log("✅ Kullanıcı zaten abone! Hemen yönlendiriliyor...");
+        setIsSubscribed(true);
+        navigation.reset({ index: 0, routes: [{ name: "Roulette" }] });
+        return;
+      }
 
-    useEffect(() => {
-        checkSubscriptionStatus();
-    }, []);
-
-    // **Eğer abonelik kontrolü devam ediyorsa loading göster**
-    if (loading) {
-        return (
-            <View style={styles.container}>
-                <ActivityIndicator size="large" color="yellow" />
-            </View>
-        );
+      setIsSubscribed(false);
+    } catch (error) {
+      console.error("❌ Abonelik kontrolü başarısız:", error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // ✅ **Satın alma işlemi**
-    const onSubscribe = async () => {
-        try {
-            setLoading(true);
-            console.log("🛒 Abonelik satın alma işlemi başlatılıyor...");
-            const offerings = await Purchases.getOfferings();
+  useEffect(() => {
+    checkSubscriptionStatus();
+  }, []);
 
-            if (offerings.current !== null) {
-                console.log("📌 Mevcut Paketler:", offerings.current.availablePackages);
-
-                const packageToBuy = offerings.current.availablePackages[0]; // İlk paketi al
-                if (packageToBuy) {
-                    const { customerInfo } = await Purchases.purchasePackage(packageToBuy);
-                    const isActive = customerInfo?.entitlements?.active?.["vip_access_1month"];
-
-                    if (isActive) {
-                        console.log("✅ Satın alma başarılı! Hemen yönlendiriliyor...");
-                        setIsSubscribed(true);
-                        navigation.reset({ index: 0, routes: [{ name: "Roulette" }] });
-                    } else {
-                        alert("⚠️ Abonelik etkinleştirilemedi.");
-                    }
-                } else {
-                    alert("⚠️ Geçerli bir abonelik paketi bulunamadı.");
-                }
-            } else {
-                alert("⚠️ Abonelik bilgileri alınamadı.");
-            }
-        } catch (error) {
-            console.error("❌ Satın alma hatası:", error);
-            alert("⚠️ Satın alma başarısız. Lütfen tekrar deneyin.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
+  // **Eğer abonelik kontrolü devam ediyorsa loading göster**
+  if (loading) {
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Roulette Private Predictor</Text>
-            <View style={styles.card}>
-                <Text style={styles.price}>$17.00<Text style={styles.perMonth}> /Month</Text></Text>
-
-                <View style={styles.featureContainer}>
-                    <Text style={styles.feature}>✔ Unlimited Predictions</Text>
-                    <Text style={styles.featureDescription}>
-                        Make as many predictions as you want with no limitations, allowing you to refine your strategy and enhance your gameplay.
-                    </Text>
-                </View>
-
-                <View style={styles.featureContainer}>
-                    <Text style={styles.feature}>✔ 90% Success Rate</Text>
-                    <Text style={styles.featureDescription}>
-                        Our advanced algorithms boost your chances of winning with up to 90% accuracy. With a constantly evolving system, 
-                        you’ll always receive the most precise predictions, keeping you one step ahead of the competition.
-                    </Text>
-                </View>
-
-                <Text style={styles.termsText}>
-                    By subscribing, you agree to our 
-                    <Text style={styles.link} onPress={() => Linking.openURL('https://play.google.com/about/play-terms/')}> EULA </Text>
-                    and 
-                    <Text style={styles.link} onPress={() => Linking.openURL('https://www.freeprivacypolicy.com/live/0f30a182-7554-4482-bd58-af362323c083')}> Privacy Policy</Text>.
-                </Text>
-            </View>
-
-            {loading ? (
-                <ActivityIndicator size="large" color="yellow" />
-            ) : (
-                <TouchableOpacity style={styles.subscribeButton} onPress={onSubscribe}>
-                    <Text style={styles.subscribeText}>Subscribe</Text>
-                </TouchableOpacity>
-            )}
-        </View>
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="yellow" />
+      </View>
     );
+  }
+
+  // ✅ **Satın alma işlemi**
+  const onSubscribe = async () => {
+    try {
+      setLoading(true);
+      console.log("🛒 Abonelik satın alma işlemi başlatılıyor...");
+      const offerings = await Purchases.getOfferings();
+
+      if (offerings.current !== null) {
+        console.log("📌 Mevcut Paketler:", offerings.current.availablePackages);
+
+        const packageToBuy = offerings.current.availablePackages.find(
+          (pkg) => pkg.identifier === PRODUCT_ID
+        );
+
+        if (packageToBuy) {
+          const { customerInfo } = await Purchases.purchasePackage(packageToBuy);
+          const isActive = customerInfo?.entitlements?.active?.[PRODUCT_ID];
+
+          if (isActive) {
+            console.log("✅ Satın alma başarılı! Hemen yönlendiriliyor...");
+            setIsSubscribed(true);
+            navigation.reset({ index: 0, routes: [{ name: "Roulette" }] });
+          } else {
+            alert("⚠️ Abonelik etkinleştirilemedi.");
+          }
+        } else {
+          alert("⚠️ Geçerli bir abonelik paketi bulunamadı.");
+        }
+      } else {
+        alert("⚠️ Abonelik bilgileri alınamadı.");
+      }
+    } catch (error) {
+      console.error("❌ Satın alma hatası:", error);
+      alert("⚠️ Satın alma başarısız. Lütfen tekrar deneyin.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Roulette Private Predictor</Text>
+      <View style={styles.card}>
+        <Text style={styles.price}>
+          $17.00<Text style={styles.perMonth}> /Month</Text>
+        </Text>
+
+        <View style={styles.featureContainer}>
+          <Text style={styles.feature}>✔ Unlimited Predictions</Text>
+          <Text style={styles.featureDescription}>
+            Make as many predictions as you want with no limitations, allowing
+            you to refine your strategy and enhance your gameplay.
+          </Text>
+        </View>
+
+        <View style={styles.featureContainer}>
+          <Text style={styles.feature}>✔ 90% Success Rate</Text>
+          <Text style={styles.featureDescription}>
+            Our advanced algorithms boost your chances of winning with up to 90%
+            accuracy. With a constantly evolving system, you’ll always receive
+            the most precise predictions, keeping you one step ahead of the
+            competition.
+          </Text>
+        </View>
+
+        <Text style={styles.termsText}>
+          By subscribing, you agree to our
+          <Text
+            style={styles.link}
+            onPress={() =>
+              Linking.openURL("https://play.google.com/about/play-terms/")
+            }
+          >
+            {" "}
+            EULA{" "}
+          </Text>
+          and
+          <Text
+            style={styles.link}
+            onPress={() =>
+              Linking.openURL(
+                "https://www.freeprivacypolicy.com/live/0f30a182-7554-4482-bd58-af362323c083"
+              )
+            }
+          >
+            {" "}
+            Privacy Policy
+          </Text>
+          .
+        </Text>
+      </View>
+
+      {loading ? (
+        <ActivityIndicator size="large" color="yellow" />
+      ) : (
+        <TouchableOpacity style={styles.subscribeButton} onPress={onSubscribe}>
+          <Text style={styles.subscribeText}>Subscribe</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
