@@ -10,8 +10,8 @@ import {
 } from "react-native";
 import Purchases from "react-native-purchases";
 
-// ✅ `config.js` dosyasını default ve named export ile içe aktardık.
-import Config, { REVENUECAT_API_KEY, PRODUCT_ID } from "./config";
+// ✅ `config.js` dosyasını içe aktar
+import Config, { REVENUECAT_API_KEY, PRODUCT_ID, BASE_PLAN_ID } from "./config";
 
 const PaywallScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
@@ -27,7 +27,7 @@ const PaywallScreen = ({ navigation }) => {
   // ✅ **Abonelik durumunu kontrol et**
   const checkSubscriptionStatus = async () => {
     try {
-      console.log("🔍 Abonelik durumu kontrol ediliyor...");
+      console.log("🔍 Checking subscription status...");
       await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
 
       const customerInfo = await Purchases.getCustomerInfo();
@@ -36,7 +36,7 @@ const PaywallScreen = ({ navigation }) => {
       const isActive = customerInfo?.entitlements?.active?.[PRODUCT_ID];
 
       if (isActive) {
-        console.log("✅ Kullanıcı zaten abone! Hemen yönlendiriliyor...");
+        console.log("✅ User is already subscribed! Directed immediately...");
         setIsSubscribed(true);
         navigation.reset({ index: 0, routes: [{ name: "Roulette" }] });
         return;
@@ -44,7 +44,7 @@ const PaywallScreen = ({ navigation }) => {
 
       setIsSubscribed(false);
     } catch (error) {
-      console.error("❌ Abonelik kontrolü başarısız:", error);
+      console.error("❌ Subscription check failed:", error);
     } finally {
       setLoading(false);
     }
@@ -67,36 +67,39 @@ const PaywallScreen = ({ navigation }) => {
   const onSubscribe = async () => {
     try {
       setLoading(true);
-      console.log("🛒 Abonelik satın alma işlemi başlatılıyor...");
+      console.log("🛒 AThe bonnet purchasing process is starting...");
       const offerings = await Purchases.getOfferings();
 
-      if (offerings.current !== null) {
-        console.log("📌 Mevcut Paketler:", offerings.current.availablePackages);
+      if (!offerings || !offerings.current) {
+        alert("⚠️ Subscription package not found. Check RevenueCat configuration.");
+        return;
+      }
 
-        const packageToBuy = offerings.current.availablePackages.find(
-          (pkg) => pkg.identifier === PRODUCT_ID
-        );
+      console.log("📌 Available Packages:", offerings.current.availablePackages);
 
-        if (packageToBuy) {
-          const { customerInfo } = await Purchases.purchasePackage(packageToBuy);
-          const isActive = customerInfo?.entitlements?.active?.[PRODUCT_ID];
+      // ✅ Ürün ID'sini doğru eşle
+      const packageToBuy = offerings.current.availablePackages.find(
+        (pkg) => pkg.product.identifier === PRODUCT_ID
+      );
 
-          if (isActive) {
-            console.log("✅ Satın alma başarılı! Hemen yönlendiriliyor...");
-            setIsSubscribed(true);
-            navigation.reset({ index: 0, routes: [{ name: "Roulette" }] });
-          } else {
-            alert("⚠️ Abonelik etkinleştirilemedi.");
-          }
-        } else {
-          alert("⚠️ Geçerli bir abonelik paketi bulunamadı.");
-        }
+      if (!packageToBuy) {
+        alert("⚠️ Subscription package not defined. Please check RevenueCat settings.");
+        return;
+      }
+
+      const { customerInfo } = await Purchases.purchasePackage(packageToBuy);
+      const isActive = customerInfo?.entitlements?.active?.[PRODUCT_ID];
+
+      if (isActive) {
+        console.log("✅ Purchase successful! Directed immediately...");
+        setIsSubscribed(true);
+        navigation.reset({ index: 0, routes: [{ name: "Roulette" }] });
       } else {
-        alert("⚠️ Abonelik bilgileri alınamadı.");
+        alert("⚠️ Subscription could not be activated.");
       }
     } catch (error) {
-      console.error("❌ Satın alma hatası:", error);
-      alert("⚠️ Satın alma başarısız. Lütfen tekrar deneyin.");
+      console.error("❌Purchase error:", error);
+      alert(`⚠️ Purchase failed. Mistake: ${error.message}`);
     } finally {
       setLoading(false);
     }
