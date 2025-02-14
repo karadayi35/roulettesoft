@@ -17,12 +17,12 @@ const PaywallScreen = ({ navigation }) => {
                 const customerInfo = await Purchases.getCustomerInfo();
                 console.log("📌 RevenueCat Yanıtı:", customerInfo);
 
-                const isActive = customerInfo.entitlements.active?.["premium"]; // ✅ DOĞRU KONTROL
+                const isActive = customerInfo.entitlements.active?.["vip_access_1month"]; // ✅ DOĞRU KONTROL
 
                 if (isActive) {
                     console.log("✅ Kullanıcı zaten abone! Yönlendiriliyor...");
                     setIsSubscribed(true);
-                    navigation.reset({ index: 0, routes: [{ name: "Roulette" }] }); // 🔹 **Kesin yönlendirme**
+                    navigation.reset({ index: 0, routes: [{ name: "RoulettePredictor" }] }); // 🔹 **Kesin yönlendirme**
                 } else {
                     setIsSubscribed(false);
                 }
@@ -58,9 +58,10 @@ const PaywallScreen = ({ navigation }) => {
             }
 
             console.log("📌 Mevcut Paketler:", offerings.current.availablePackages);
-
-            // ✅ Doğru paketi seç
-            const packageToBuy = offerings.current.availablePackages[0];
+            // ✅ Güncellenmiş Paket Kontrolü
+            const packageToBuy = offerings.current.availablePackages.find(
+            (pkg) => pkg.product.identifier === "vip_access_1month"
+         );
 
             if (!packageToBuy) {
                 alert("⚠️ Geçerli bir abonelik paketi bulunamadı.");
@@ -68,12 +69,12 @@ const PaywallScreen = ({ navigation }) => {
             }
 
             const { customerInfo } = await Purchases.purchasePackage(packageToBuy);
-            const isActive = customerInfo.entitlements.active?.["premium"];
+            const isActive = customerInfo.entitlements.active?.["vip_access_1month"];
 
             if (isActive) {
                 console.log("✅ Satın alma başarılı! Hemen yönlendiriliyor...");
                 setIsSubscribed(true);
-                navigation.reset({ index: 0, routes: [{ name: "Roulette" }] });
+                navigation.reset({ index: 0, routes: [{ name: "RoulettePredictor" }] });
             } else {
                 alert("⚠️ Abonelik etkinleştirilemedi.");
             }
