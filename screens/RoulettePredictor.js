@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Modal, StatusBar, ActivityIndicator } from 'react-native';
 import Qonversion from "com.qonversion.android.sdk.Qonversion";
-import { QonversionConfig, QLaunchMode } from "com.qonversion.android.sdk.QonversionConfig";
+import Qonversion from 'react-native-qonversion';
+
 
 const RoulettePredictor = ({ navigation }) => {
     const [lastNumber, setLastNumber] = useState('');
