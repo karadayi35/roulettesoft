@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Modal, StatusBar, ActivityIndicator } from 'react-native';
-import Qonversion from "com.qonversion.android.sdk.Qonversion";
+
 import Qonversion from 'react-native-qonversion';
 
 
