@@ -1,33 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Linking, ActivityIndicator, StatusBar } from 'react-native';
-import Purchases from "react-native-purchases";
-import { REVENUECAT_API_KEY, PRODUCT_ID } from "./config"; 
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Linking, ActivityIndicator } from "react-native";
+import Qonversion from "com.qonversion.android.sdk.Qonversion";
+import { QonversionConfig, QLaunchMode } from "com.qonversion.android.sdk.QonversionConfig";
 
 const PaywallScreen = ({ navigation }) => {
     const [loading, setLoading] = useState(true);
-    const [isSubscribed, setIsSubscribed] = useState(false);
+    const [isSubscribed, setIsSubscribed] = useState(false); 
 
-    // ✅ **RevenueCat Yapılandırması (İlk Çalıştırma)**
     useEffect(() => {
-        Purchases.configure({ apiKey: REVENUECAT_API_KEY });
+        // ✅ Qonversion SDK'yı başlat
+        const qonversionConfig = new QonversionConfig.Builder(
+            "BxQZimX3ikLnlKPz1dS2MTtm7hdlmGJb",  // **Kendi API anahtarını kullan**
+            QLaunchMode.Analytics
+        ).build();
+        
+        Qonversion.initialize(qonversionConfig);
 
+        // ✅ Abonelik durumunu kontrol et
         const checkSubscriptionStatus = async () => {
             try {
-                console.log("🔍 Abonelik durumu kontrol ediliyor...");
-                const customerInfo = await Purchases.getCustomerInfo();
-                console.log("📌 RevenueCat Yanıtı:", customerInfo);
-
-                const isActive = customerInfo.entitlements.active?.["vip_access_1month"]; // ✅ DOĞRU KONTROL
-
-                if (isActive) {
+                console.log("🔍 Kullanıcı abonelik durumu kontrol ediliyor...");
+                const entitlements = await Qonversion.getSharedInstance().checkEntitlements();
+                
+                if (entitlements["premium"] && entitlements["premium"].isActive()) {
                     console.log("✅ Kullanıcı zaten abone! Yönlendiriliyor...");
                     setIsSubscribed(true);
-                    navigation.reset({ index: 0, routes: [{ name: "RoulettePredictor" }] }); // 🔹 **Kesin yönlendirme**
+                    navigation.reset({ index: 0, routes: [{ name: "RoulettePredictor" }] });
                 } else {
+                    console.log("🚫 Kullanıcı abone değil.");
                     setIsSubscribed(false);
                 }
             } catch (error) {
                 console.error("❌ Abonelik kontrolü başarısız:", error);
+                setIsSubscribed(false);
             } finally {
                 setLoading(false);
             }
@@ -50,28 +55,19 @@ const PaywallScreen = ({ navigation }) => {
         try {
             setLoading(true);
             console.log("🛒 Abonelik satın alma işlemi başlatılıyor...");
-            const offerings = await Purchases.getOfferings();
+            const products = await Qonversion.getSharedInstance().products();
 
-            if (!offerings.current) {
-                alert("⚠️ Abonelik paketi bulunamadı. RevenueCat yapılandırmasını kontrol edin.");
+            if (!products || !products["vip_access_1month"]) {
+                alert("⚠️ Abonelik paketi bulunamadı. Qonversion yapılandırmasını kontrol edin.");
                 return;
             }
 
-            console.log("📌 Mevcut Paketler:", offerings.current.availablePackages);
-            // ✅ Güncellenmiş Paket Kontrolü
-            const packageToBuy = offerings.current.availablePackages.find(
-            (pkg) => pkg.product.identifier === "vip_access_1month"
-         );
+            console.log("📌 Mevcut Ürünler:", products);
+            const productToBuy = products["vip_access_1month"];
 
-            if (!packageToBuy) {
-                alert("⚠️ Geçerli bir abonelik paketi bulunamadı.");
-                return;
-            }
+            const purchaseResult = await Qonversion.getSharedInstance().purchase(productToBuy.qonversionId);
 
-            const { customerInfo } = await Purchases.purchasePackage(packageToBuy);
-            const isActive = customerInfo.entitlements.active?.["vip_access_1month"];
-
-            if (isActive) {
+            if (purchaseResult.entitlements["premium"] && purchaseResult.entitlements["premium"].isActive()) {
                 console.log("✅ Satın alma başarılı! Hemen yönlendiriliyor...");
                 setIsSubscribed(true);
                 navigation.reset({ index: 0, routes: [{ name: "RoulettePredictor" }] });
@@ -122,23 +118,21 @@ const PaywallScreen = ({ navigation }) => {
                     <Text style={styles.subscribeText}>Subscribe</Text>
                 </TouchableOpacity>
             )}
+
+            {/* ✅ Debug için isSubscribed durumunu ekrana yazdırıyorum */}
+            <Text style={{ color: "yellow", marginTop: 10 }}>Abonelik Durumu: {isSubscribed ? "Aktif" : "Pasif"}</Text>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: 'black', alignItems: 'center', justifyContent: 'center', padding: 20 },
-    title: { fontSize: 25, fontWeight: 'bold', color: 'yellow', marginBottom: 20 },
-    card: { backgroundColor: '#16202b', padding: 20, borderRadius: 15, width: '90%', alignItems: 'flex-start' },
-    price: { fontSize: 28, fontWeight: 'bold', color: 'yellow', textAlign: 'left' },
-    perMonth: { fontSize: 18, color: 'white' },
-    featureContainer: { marginTop: 15, width: '100%' },
-    feature: { fontSize: 18, fontWeight: 'bold', color: 'yellow' },
-    featureDescription: { fontSize: 14, color: 'white', textAlign: 'left', marginLeft: 25 },
-    termsText: { fontSize: 14, color: 'white', textAlign: 'center', marginTop: 20, width: '100%' },
-    link: { color: 'yellow', fontWeight: 'bold' },
-    subscribeButton: { backgroundColor: '#FFCC00', paddingVertical: 15, paddingHorizontal: 50, borderRadius: 10, marginTop: 20 },
-    subscribeText: { fontSize: 20, fontWeight: 'bold', color: 'black' },
+    container: { flex: 1, backgroundColor: "black", alignItems: "center", justifyContent: "center", padding: 20 },
+    title: { fontSize: 25, fontWeight: "bold", color: "yellow", marginBottom: 20 },
+    card: { backgroundColor: "#16202b", padding: 20, borderRadius: 15, width: "90%", alignItems: "flex-start" },
+    price: { fontSize: 28, fontWeight: "bold", color: "yellow", textAlign: "left" },
+    perMonth: { fontSize: 18, color: "white" },
+    subscribeButton: { backgroundColor: "#FFCC00", paddingVertical: 15, paddingHorizontal: 50, borderRadius: 10, marginTop: 20 },
+    subscribeText: { fontSize: 20, fontWeight: "bold", color: "black" },
 });
 
 export default PaywallScreen;

@@ -1,19 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Modal, StatusBar } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Modal, StatusBar, ActivityIndicator } from 'react-native';
+import Qonversion from "com.qonversion.android.sdk.Qonversion";
+import { QonversionConfig, QLaunchMode } from "com.qonversion.android.sdk.QonversionConfig";
 
-const RoulettePredictor = () => {
+const RoulettePredictor = ({ navigation }) => {
     const [lastNumber, setLastNumber] = useState('');
     const [predictions, setPredictions] = useState([]);
-    const [lastNumbersList, setLastNumbersList] = useState([]); 
+    const [lastNumbersList, setLastNumbersList] = useState([]);
     const [initialEntries, setInitialEntries] = useState(0);
     const [showHowToPlay, setShowHowToPlay] = useState(false);
+    const [loading, setLoading] = useState(true); // Abonelik durumu kontrolü için
+    const [isSubscribed, setIsSubscribed] = useState(false); // Abonelik durumu
 
     // ✅ **Status Bar ve Tam Ekran Yönetimi**
     useEffect(() => {
         StatusBar.setTranslucent(true);
         StatusBar.setBackgroundColor("transparent");
-        StatusBar.setBarStyle("light-content"); // Eğer koyu tema kullanıyorsanız "dark-content" olarak değiştirin
+        StatusBar.setBarStyle("light-content");
     }, []);
+
+    // ✅ **Qonversion Abonelik Kontrolü**
+    useEffect(() => {
+        const checkSubscriptionStatus = async () => {
+            try {
+                console.log("🔍 Kullanıcı abonelik durumu kontrol ediliyor...");
+                const entitlements = await Qonversion.getSharedInstance().checkEntitlements();
+
+                if (entitlements["premium"] && entitlements["premium"].isActive()) {
+                    console.log("✅ Kullanıcı hala abone!");
+                    setIsSubscribed(true);
+                } else {
+                    console.log("🚫 Kullanıcı artık abone değil! `PaywallScreen` sayfasına yönlendiriliyor...");
+                    setIsSubscribed(false);
+                    navigation.reset({ index: 0, routes: [{ name: "Paywall" }] });
+                }
+            } catch (error) {
+                console.error("❌ Abonelik kontrolü başarısız:", error);
+                setIsSubscribed(false);
+                navigation.reset({ index: 0, routes: [{ name: "Paywall" }] });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        checkSubscriptionStatus();
+    }, []);
+
+    // **Eğer abonelik kontrolü devam ediyorsa loading göster**
+    if (loading) {
+        return (
+            <View style={styles.container}>
+                <ActivityIndicator size="large" color="yellow" />
+            </View>
+        );
+    }
 
     const generatePredictions = () => {
         const number = parseInt(lastNumber);
@@ -30,10 +70,10 @@ const RoulettePredictor = () => {
             }
         }
 
-        setLastNumbersList([number, ...lastNumbersList]); 
-        setLastNumber(''); 
+        setLastNumbersList([number, ...lastNumbersList]);
+        setLastNumber('');
         setInitialEntries(prev => prev + 1);
-        if (initialEntries >= 4) { 
+        if (initialEntries >= 4) {
             setPredictions(newPredictions);
         }
     };
