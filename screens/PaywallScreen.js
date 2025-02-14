@@ -1,34 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Linking, ActivityIndicator } from "react-native";
-import Qonversion from "com.qonversion.android.sdk.Qonversion";
-import { QonversionConfig, QLaunchMode } from "com.qonversion.android.sdk.QonversionConfig";
+import Qonversion, { QLaunchMode } from "react-native-qonversion";
+
+const APP_KEY = "BxQZimX3ikLnlKPz1dS2MTtm7hdlmGJb"; // 📌 Kendi Qonversion API Anahtarın
+const PRODUCT_ID = "vip_access_1month"; // 📌 Qonversion’daki ürün kimliği
 
 const PaywallScreen = ({ navigation }) => {
     const [loading, setLoading] = useState(true);
-    const [isSubscribed, setIsSubscribed] = useState(false); 
+    const [isSubscribed, setIsSubscribed] = useState(false);
 
     useEffect(() => {
         // ✅ Qonversion SDK'yı başlat
-        const qonversionConfig = new QonversionConfig.Builder(
-            "BxQZimX3ikLnlKPz1dS2MTtm7hdlmGJb",  // **Kendi API anahtarını kullan**
-            QLaunchMode.Analytics
-        ).build();
-        
-        Qonversion.initialize(qonversionConfig);
+        Qonversion.initialize(APP_KEY, QLaunchMode.SubscriptionManagement);
 
         // ✅ Abonelik durumunu kontrol et
         const checkSubscriptionStatus = async () => {
             try {
                 console.log("🔍 Kullanıcı abonelik durumu kontrol ediliyor...");
-                const entitlements = await Qonversion.getSharedInstance().checkEntitlements();
-                
-                if (entitlements["premium"] && entitlements["premium"].isActive()) {
+                const entitlements = await Qonversion.checkPermissions();
+                console.log("📌 Qonversion Yanıtı:", entitlements);
+
+                const isActive = Object.values(entitlements).some((perm) => perm.isActive);
+                setIsSubscribed(isActive);
+
+                if (isActive) {
                     console.log("✅ Kullanıcı zaten abone! Yönlendiriliyor...");
-                    setIsSubscribed(true);
                     navigation.reset({ index: 0, routes: [{ name: "RoulettePredictor" }] });
                 } else {
                     console.log("🚫 Kullanıcı abone değil.");
-                    setIsSubscribed(false);
                 }
             } catch (error) {
                 console.error("❌ Abonelik kontrolü başarısız:", error);
@@ -55,19 +54,19 @@ const PaywallScreen = ({ navigation }) => {
         try {
             setLoading(true);
             console.log("🛒 Abonelik satın alma işlemi başlatılıyor...");
-            const products = await Qonversion.getSharedInstance().products();
+            const products = await Qonversion.products();
 
-            if (!products || !products["vip_access_1month"]) {
+            if (!products || !products[PRODUCT_ID]) {
                 alert("⚠️ Abonelik paketi bulunamadı. Qonversion yapılandırmasını kontrol edin.");
                 return;
             }
 
             console.log("📌 Mevcut Ürünler:", products);
-            const productToBuy = products["vip_access_1month"];
+            const productToBuy = products[PRODUCT_ID];
 
-            const purchaseResult = await Qonversion.getSharedInstance().purchase(productToBuy.qonversionId);
+            const purchaseResult = await Qonversion.purchase(productToBuy.qonversionId);
 
-            if (purchaseResult.entitlements["premium"] && purchaseResult.entitlements["premium"].isActive()) {
+            if (purchaseResult.entitlements["premium"] && purchaseResult.entitlements["premium"].isActive) {
                 console.log("✅ Satın alma başarılı! Hemen yönlendiriliyor...");
                 setIsSubscribed(true);
                 navigation.reset({ index: 0, routes: [{ name: "RoulettePredictor" }] });

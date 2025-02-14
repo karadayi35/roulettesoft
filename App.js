@@ -4,36 +4,29 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import PaywallScreen from "./screens/PaywallScreen";
 import RoulettePredictor from "./screens/RoulettePredictor";
-import Qonversion from "com.qonversion.android.sdk.Qonversion";
-import { QonversionConfig, QLaunchMode } from "com.qonversion.android.sdk.QonversionConfig";
+import Qonversion, { QLaunchMode } from "react-native-qonversion";
 
 const Stack = createStackNavigator();
+
+const APP_KEY = "BxQZimX3ikLnlKPz1dS2MTtm7hdlmGJb"; // 📌 Buraya kendi Qonversion API anahtarını yaz
 
 const App = () => {
     const [isSubscribed, setIsSubscribed] = useState(null);
 
     useEffect(() => {
-        // ✅ Qonversion SDK'yı başlat
-        const qonversionConfig = new QonversionConfig.Builder(
-            "BxQZimX3ikLnlKPz1dS2MTtm7hdlmGJb",  // **Kendi API anahtarını kullan**
-            QLaunchMode.Analytics
-        ).build();
-        
-        Qonversion.initialize(qonversionConfig);
+        // ✅ Qonversion SDK başlatma
+        Qonversion.initialize(APP_KEY, QLaunchMode.SubscriptionManagement);
 
         // ✅ Abonelik durumunu kontrol et
         const checkSubscriptionStatus = async () => {
             try {
-                console.log("🔍 Kullanıcı abonelik durumu kontrol ediliyor...");
-                const entitlements = await Qonversion.getSharedInstance().checkEntitlements();
-                
-                if (entitlements["premium"] && entitlements["premium"].isActive()) {
-                    console.log("✅ Kullanıcı zaten abone!");
-                    setIsSubscribed(true);
-                } else {
-                    console.log("🚫 Kullanıcı abone değil.");
-                    setIsSubscribed(false);
-                }
+                console.log("🔍 Abonelik durumu kontrol ediliyor...");
+                const entitlements = await Qonversion.checkPermissions();
+                console.log("📌 Qonversion Yanıtı:", entitlements);
+
+                // 📌 Kullanıcının aktif bir aboneliği var mı kontrol et
+                const isActive = Object.values(entitlements).some((perm) => perm.isActive);
+                setIsSubscribed(isActive);
             } catch (error) {
                 console.error("❌ Abonelik kontrolü başarısız:", error);
                 setIsSubscribed(false);
@@ -43,13 +36,14 @@ const App = () => {
         checkSubscriptionStatus();
     }, []);
 
-    // ✅ **Status Bar ve Fullscreen Yönetimi**
+    // ✅ **Status Bar Güncellemesi**
     useEffect(() => {
         StatusBar.setTranslucent(false);
         StatusBar.setBackgroundColor("#000000");
         StatusBar.setBarStyle("light-content");
     }, []);
 
+    // **Eğer abonelik durumu yüklenmemişse, bekleme ekranı göster**
     if (isSubscribed === null) {
         return (
             <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
