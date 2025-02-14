@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, ActivityIndicator, StatusBar } from "react-native";
+import { View, ActivityIndicator, StatusBar, Alert } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import PaywallScreen from "./screens/PaywallScreen";
@@ -8,20 +8,23 @@ import Qonversion, { QLaunchMode } from "react-native-qonversion";
 
 const Stack = createStackNavigator();
 
-const APP_KEY = "BxQZimX3ikLnlKPz1dS2MTtm7hdlmGJb"; // 📌 Buraya kendi Qonversion API anahtarını yaz
+// 📌 **Kendi Qonversion API Key’ini buraya ekle!**
+const APP_KEY = "BxQZimX3ikLnlKPz1dS2MTtm7hdlmGJb"; 
 
 const App = () => {
     const [isSubscribed, setIsSubscribed] = useState(null);
 
     useEffect(() => {
-        // ✅ Qonversion SDK başlatma
-        Qonversion.initialize(APP_KEY, QLaunchMode.SubscriptionManagement);
-
-        // ✅ Abonelik durumunu kontrol et
-        const checkSubscriptionStatus = async () => {
+        const initializeQonversion = async () => {
             try {
+                console.log("🚀 Qonversion başlatılıyor...");
+                
+                // ✅ Qonversion SDK başlatma
+                Qonversion.initialize(APP_KEY, QLaunchMode.SubscriptionManagement);
+                
                 console.log("🔍 Abonelik durumu kontrol ediliyor...");
                 const entitlements = await Qonversion.checkPermissions();
+
                 console.log("📌 Qonversion Yanıtı:", entitlements);
 
                 // 📌 Kullanıcının aktif bir aboneliği var mı kontrol et
@@ -29,11 +32,12 @@ const App = () => {
                 setIsSubscribed(isActive);
             } catch (error) {
                 console.error("❌ Abonelik kontrolü başarısız:", error);
+                Alert.alert("Hata", "Abonelik durumu kontrol edilemedi. Lütfen tekrar deneyin.");
                 setIsSubscribed(false);
             }
         };
 
-        checkSubscriptionStatus();
+        initializeQonversion();
     }, []);
 
     // ✅ **Status Bar Güncellemesi**
@@ -43,7 +47,7 @@ const App = () => {
         StatusBar.setBarStyle("light-content");
     }, []);
 
-    // **Eğer abonelik durumu yüklenmemişse, bekleme ekranı göster**
+    // 📌 **Eğer abonelik durumu yüklenmemişse, bekleme ekranı göster**
     if (isSubscribed === null) {
         return (
             <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>

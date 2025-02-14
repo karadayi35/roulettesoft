@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Linking, ActivityIndicator } from "react-native";
-import Qonversion, { QLaunchMode } from "react-native-qonversion";
+import Qonversion from 'react-native-qonversion';
+
 
 const APP_KEY = "BxQZimX3ikLnlKPz1dS2MTtm7hdlmGJb"; // 📌 Kendi Qonversion API Anahtarın
 const PRODUCT_ID = "vip_access_1month"; // 📌 Qonversion’daki ürün kimliği

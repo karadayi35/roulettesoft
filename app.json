@@ -3,7 +3,7 @@
     "name": "roulettesoft",
     "slug": "roulettesoft",
     "version": "3.1.1",
-    "runtimeVersion": "3.1.1",  
+    "runtimeVersion": "3.1.1",
     "orientation": "portrait",
     "icon": "./screens/assets/icon.png",
     "userInterfaceStyle": "light",
@@ -34,6 +34,14 @@
     },
     "updates": {
       "url": "https://u.expo.dev/05fea1d0-58e1-4a3b-9ba6-9dd08f6d5d9f"
-    }
+    },
+    "plugins": [
+      [
+        "react-native-qonversion",
+        {
+          "autoTrackPurchases": true
+        }
+      ]
+    ]
   }
 }
